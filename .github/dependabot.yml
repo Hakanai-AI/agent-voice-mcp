@@ -5,11 +5,11 @@ updates:
     schedule:
       interval: "weekly"
     reviewers:
-      - "chenjr0719"
+      - "Hakanai-AI"
 
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "weekly"
     reviewers:
-      - "chenjr0719"
+      - "Hakanai-AI"
