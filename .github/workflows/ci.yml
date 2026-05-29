@@ -11,8 +11,7 @@ permissions:
 
 jobs:
   lint:
-    runs-on: [self-hosted, linux, arm64]
-    container: python:3.12-bookworm
+    runs-on: hakanai-runners
     steps:
       - uses: actions/checkout@v6
 
