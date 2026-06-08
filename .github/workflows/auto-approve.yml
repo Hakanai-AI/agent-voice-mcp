@@ -46,7 +46,25 @@ jobs:
                 pullRequest { id }
               }
             }`;
-            await github.graphql(mutation, {
+            const args = {
               pullRequestId: context.payload.pull_request.node_id,
               mergeMethod: 'SQUASH',
-            });
+            };
+            // Retry on UNSTABLE: enablePullRequestAutoMerge rejects when other
+            // required checks are still running at the moment this step fires.
+            // Sleep + retry rides out the race; eventual success once mergeStateStatus
+            // becomes CLEAN or BEHIND. Total max wait: 30 + 60 + 120 = 210s.
+            const delays = [30000, 60000, 120000];
+            for (let attempt = 0; attempt <= delays.length; attempt++) {
+              try {
+                await github.graphql(mutation, args);
+                core.info(`Auto-merge enabled${attempt > 0 ? ` after ${attempt} retry/retries` : ''}`);
+                return;
+              } catch (err) {
+                const msg = err?.errors?.[0]?.message || err?.message || '';
+                const isUnstable = msg.includes('unstable status');
+                if (!isUnstable || attempt === delays.length) throw err;
+                core.warning(`Attempt ${attempt + 1}: PR mergeStateStatus is unstable, retrying in ${delays[attempt] / 1000}s`);
+                await new Promise(r => setTimeout(r, delays[attempt]));
+              }
+            }
