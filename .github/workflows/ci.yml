@@ -31,7 +31,7 @@ jobs:
     needs: [lint]
     runs-on: ubuntu-latest
     steps:
-      - uses: Hakanai-AI/.github/.github/actions/notify-webhook@main
+      - uses: Hakanai-AI/.github/actions/notify-webhook@main
         with:
           status: ${{ needs.lint.result }}
           webhook_secret: ${{ secrets.WEBHOOK_SECRET }}
